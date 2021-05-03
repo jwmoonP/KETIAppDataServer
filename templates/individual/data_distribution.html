@@ -1,0 +1,75 @@
+{% extends '/individual/layout.html' %} {% block content %}
+<div class="container-fluid">
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+      <h1 class="h3 mb-0 text-gray-800">Data Distribution Analysis</h1>
+    </div>
+    <!-- Content Row -->
+	<div class='row'>
+		<div class="col-xl-12 col-lg-12">
+			<div>
+				<select id ='select1' class='btn btn-secondary dropdown no-arrow mb-4 '></select>
+				<a href="#" class="btn btn-success dropdown no-arrow mb-4" id='submit'>
+                    <i class="fas fa-check"></i>
+                 </a>
+			</div>
+		</div>
+	</div>
+	<div class='row'>
+		<div class="col-xl-6 col-lg-6">
+        	<div class="card shadow mb-8 original">
+	          <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+	            <h6 class="m-0 font-weight-bold text-primary"> {{feature}} Feature Data Distribution</h6>
+	          </div>
+	          <!-- Card Body -->
+	          <div class="card-body">
+	           	<div id='causal_result'>
+					<img src={{url_for('fig_data_distribution', feature = feature)}} width="100%" height='450' />
+				</div>
+	          </div>
+        	</div>
+   	 	</div>
+   	 	<div class="col-xl-6 col-lg-6">
+        	<div class="card shadow mb-8 original">
+	          <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+	            <h6 class="m-0 font-weight-bold text-primary"> {{feature}} Feature ACF, PACF Graph</h6>
+	          </div>
+	          <!-- Card Body -->
+	          <div class="card-body">
+	           	<div id='causal_result'>
+					<img src={{url_for('fig_acf_pacf', feature = feature)}} width="100%" height='450' />
+				</div>
+	          </div>
+        	</div>
+   	 	</div>
+	</div>
+</div>
+{% endblock %}
+{% block script %} 
+<script>		
+var feature1={{data_list |tojson |safe}}
+function makeSelect(feature, select){
+	feature.forEach(function(item){
+		var option = $('<option></option>');
+		$(option).addClass('btn btn-secondary')
+		$(option).val(item)
+		$(option).html(item)
+		$(select).append(option)
+	});
+}
+
+var callBack = function(){
+	makeSelect(feature1, '#select1');
+	
+};
+$(document).ready(callBack);
+
+
+$('#submit').click(function(){
+	val1 = $('#select1').val()
+	console.log(val1)
+	window.location.href='/data_distribution/'+val1;
+});
+
+</script>
+{% endblock %}

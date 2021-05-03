@@ -1,0 +1,149 @@
+{% extends '/individual/layout.html' %} {% block content %}
+<div class="container-fluid">
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+      <h1 class="h3 mb-0 text-gray-800">Causality Analysis</h1>
+    </div>
+    <!-- Content Row -->
+	<div class='row'>
+		<div class="col-xl-12 col-lg-12">
+			<div>
+				<select id ='select1' class='btn btn-secondary dropdown no-arrow mb-4 '>
+				</select>
+				<a href="#" class="btn btn-success dropdown no-arrow mb-4" id='submit'>
+                    <i class="fas fa-check"></i>
+                 </a>
+			</div>
+		</div>
+	</div>
+    <div class="row">
+		<div class="col-xl-8 col-lg-8">
+        	<div class="card shadow mb-8 original">
+	          <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+	            <h6 class="m-0 font-weight-bold text-primary feature_1"><div id="feature1"></div>Data Synchrony</h6>
+	          </div>
+	          <!-- Card Body -->
+	          <div class="card-body">
+	           	<div id='causal_result'>
+					<canvas id="graph" width="100%" height="30"></canvas>
+				</div>
+	          </div>
+        	</div>
+   	 	</div>
+   	 
+   	 	<div class="col-xl-4 col-lg-4">
+	   	 	<div class="row">
+	   	 		<div class="col-xl-10 col-md-10 mb-12">
+	              <div class="card border-left-success shadow h-30 py-2">
+	                <div class="card-body">
+	                  <div class="row no-gutters align-items-center">
+	                    <div class="col mr-2">
+	                      <div class="text-s font-weight-bold text-success text-uppercase mb-1 feature_1"></div>
+	                      <div class="h6 mb-0 text-gray-800"><div class="font-weight-bold">This feature might be highly affected by <div class="f_number"></div><code class="correlated_values">{{val1}}</code></div>
+	                	</div>
+	                    <div class="col-auto">
+	                      <i class="fas fa-link fa-2x text-gray-300"></i>
+	                    </div>
+	                  </div>
+	                </div>
+	              </div>
+	            </div>
+	   	 	</div>
+   	 	</div>
+   	 </div>
+   </div>
+{% endblock %}
+{% block script %} 
+<script src={{url_for('static', filename="js/Chart.js")}}></script>
+<script>	
+function remove_item_array_of_objs(_str, _arr){
+	return 
+}
+var high_causal_json = {{high_causal_json|tojson|safe}}
+var feature1 = Object.keys(high_causal_json)
+feature1 = feature1.filter(item=>!item.includes('_corr'));
+feature1 = feature1.filter(item=>!item.includes('_lag'));
+
+function makeSelect(feature, select){
+	feature.forEach(function(item){
+		var option = $('<option></option>');
+		$(option).addClass('btn btn-secondary')
+		$(option).val(item)
+		$(option).html(item)
+		$(select).append(option)
+	});
+}
+
+function draw_graph(val1){
+	feature2_list = high_causal_json[val1]
+	feature2_corr = high_causal_json[val1+'_corr']
+	feature2_lag = high_causal_json[val1+'_lag']
+	title = $('.feature_1')
+	$(title).html(val1)
+	
+	f_number = $('.f_number')
+	$(f_number).html("")
+	len_feature = Object.keys(feature2_list).length
+	$(f_number).append(len_feature +' values:')
+	correlated_values = $('.correlated_values')
+	$(correlated_values).html("")
+	for (var i in feature2_list){
+		var num = String(Number(i)+1)
+		$(correlated_values).append(num+')'+ feature2_list[i]+' ')
+	}
+	
+	var original = document.getElementById('graph').getContext('2d');
+	var myChart = new Chart(original, {
+	    type: 'bar',
+	    data: {
+	        labels: feature2_list,
+	        datasets: [{
+	            label: 'Maximum Timelagged Correlation',
+	            data: feature2_corr,
+	            backgroundColor: [
+	                'rgba(255, 99, 132, 0.2)',
+	                'rgba(54, 162, 235, 0.2)',
+	                'rgba(255, 206, 86, 0.2)',
+	                'rgba(75, 192, 192, 0.2)',
+	                'rgba(153, 102, 255, 0.2)',
+	                'rgba(255, 159, 64, 0.2)'
+	            ],
+	            borderColor: [
+	                'rgba(255, 99, 132, 1)',
+	                'rgba(54, 162, 235, 1)',
+	                'rgba(255, 206, 86, 1)',
+	                'rgba(75, 192, 192, 1)',
+	                'rgba(153, 102, 255, 1)',
+	                'rgba(255, 159, 64, 1)'
+	            ],
+	            borderWidth: 1
+	        }]
+	    },
+	    options: {
+	        scales: {
+	            yAxes: [{
+	                ticks: {
+	                    beginAtZero: true
+	                }
+	            }]
+	        }
+	    }
+	});
+	
+}
+
+var callBack = function(){
+	makeSelect(feature1, '#select1');
+	val1 = feature1[0]
+	draw_graph(val1)
+	
+};
+$(document).ready(callBack);
+
+$('#submit').click(function(){
+	val1 = $('#select1').val()
+	draw_graph(val1)
+});
+
+</script>
+{% endblock %}

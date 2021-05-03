@@ -1,0 +1,71 @@
+{% extends '/individual/layout.html' %} {% block content %}
+<div class="container-fluid">
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+      <h1 class="h3 mb-0 text-gray-800">Data Distribution Analysis</h1>
+    </div>
+    <!-- Content Row -->
+	<div class='row'>
+		<div class="col-xl-12 col-lg-12">
+			<div>
+				<select id ='select1' class='btn btn-secondary dropdown no-arrow mb-4 '></select>
+				<select id ='select2' class='btn btn-secondary dropdown no-arrow mb-4 '></select>
+				<select id ='select3' class='btn btn-secondary dropdown no-arrow mb-4 '></select>
+				<a href="#" class="btn btn-success dropdown no-arrow mb-4" id='submit'>
+                    <i class="fas fa-check"></i>
+                 </a>
+			</div>
+		</div>
+	</div>
+	<div class='row'>
+		<div class="col-xl-8 col-lg-8">
+        	<div class="card shadow mb-8 original">
+	          <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+	            <h6 class="m-0 font-weight-bold text-primary"> {{feature}} Feature Data Distribution</h6>
+	          </div>
+	          <!-- Card Body -->
+	          <div class="card-body">
+	           	<div id='causal_result'>
+					<img src={{url_for('fig_grangers_causation', feature = feature, maxlag = maxlag, datatype = datatype)}} width="100%" height='450' />
+				</div>
+	          </div>
+        	</div>
+   	 	</div>
+	</div>
+</div>
+{% endblock %}
+{% block script %} 
+<script>		
+var feature1={{data_list |tojson |safe}}
+var feature2= [6, 12, 24]
+var feature3= {{datatype_list| tojson |safe}}
+
+function makeSelect(feature, select){
+	feature.forEach(function(item){
+		var option = $('<option></option>');
+		$(option).addClass('btn btn-secondary')
+		$(option).val(item)
+		$(option).html(item)
+		$(select).append(option)
+	});
+}
+
+var callBack = function(){
+	makeSelect(feature1, '#select1');
+	makeSelect(feature2, '#select2');
+	makeSelect(feature3, '#select3');
+	
+};
+$(document).ready(callBack);
+
+
+$('#submit').click(function(){
+	val1 = $('#select1').val()
+	val2 = $('#select2').val()
+	val3 = $('#select3').val()
+	console.log(val1, val2)
+	window.location.href='/farm_status_correlation/'+val1+'/'+val2+'/'+val3;
+});
+
+</script>
+{% endblock %}

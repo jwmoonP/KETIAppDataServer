@@ -1,0 +1,159 @@
+{% extends '/individual/layout.html' %} {% block content %}
+<div class="container-fluid">
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+      <h1 class="h3 mb-0 text-gray-800">Causality Analysis</h1>
+    </div>
+    <!-- Content Row -->
+	<div class='row'>
+		<div class="col-xl-12 col-lg-12">
+			<div>
+				<select id ='select1' class='btn btn-secondary dropdown no-arrow mb-4 '>
+				</select>
+				<select id ='select2' class='btn btn-secondary dropdown no-arrow mb-4 '>
+				</select>
+				<a href="#" class="btn btn-success dropdown no-arrow mb-4" id='submit'>
+                    <i class="fas fa-check"></i>
+                 </a>
+			</div>
+		</div>
+	</div>
+    <div class="row">
+		<div class="col-xl-8 col-lg-8">
+        	<div class="card shadow mb-8 original">
+	          <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+	            <h6 class="m-0 font-weight-bold text-primary"> {{val1}} VS. {{val2}} Data Synchrony</h6>
+	          </div>
+	          <!-- Card Body -->
+	          <div class="card-body">
+	           	<div id='causal_result'>
+					<img src={{url_for('fig_causality', val1 = val1, val2 = val2, lag_range=24)}} width="100%" height='300' />
+				</div>
+	          </div>
+        	</div>
+   	 	</div>
+   	 
+   	 	<div class="col-xl-4 col-lg-4">
+	   	 	<div class="row">
+	   	 		<div class="col-xl-10 col-md-10 mb-12">
+	              <div class="card border-left-success shadow h-30 py-2">
+	                <div class="card-body">
+	                  <div class="row no-gutters align-items-center">
+	                    <div class="col mr-2">
+	                      <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Maximum Correlation value</div>
+	                      <div class="h6 mb-0 text-gray-800"><div class="font-weight-bold">The Maximum absolute correlation</div> value between <code>{{val1}}</code> and <code>{{val2}} </code>is <code class="font-weight-bold">{{absmax}}</code>.</div>
+	                	</div>
+	                    <div class="col-auto">
+	                      <i class="fas fa-link fa-2x text-gray-300"></i>
+	                    </div>
+	                  </div>
+	                </div>
+	              </div>
+	            </div>
+	            <div class="col-xl-10 col-md-10 mb-12">
+	              <div class="card border-left-success shadow h-30 py-2">
+	                <div class="card-body">
+	                  <div class="row no-gutters align-items-center">
+	                    <div class="col mr-2">
+	                      <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Maximum - Minimum </div>
+	                       <div class="h6 mb-0 text-gray-800"><div class="font-weight-bold">The difference between the values of Maximum and Minimum correlation</div> value is <code class="font-weight-bold">{{min_max_diff}}</code>.</div>
+	                    </div>
+	                    <div class="col-auto">
+	                      <i class="fas fa-minus-square fa-2x text-gray-300"></i>
+	                    </div>
+	                  </div>
+	                </div>
+	              </div>
+	            </div>
+	            <div class="col-xl-10 col-md-10 mb-12">
+	              <div class="card border-left-success shadow h-30 py-2">
+	                <div class="card-body">
+	                  <div class="row no-gutters align-items-center">
+	                    <div class="col mr-2">
+	                      <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Result</div>
+	                      <div class="h6 mb-0 text-gray-800 font-weight-bold" id='result_statement'></div>
+	                    </div>
+	                    <div class="col-auto">
+	                      <i class="fas fa-poll fa-2x text-gray-300"></i>
+	                    </div>
+	                  </div>
+	                </div>
+	              </div>
+	            </div>
+	   	 	</div>
+   	 	</div>
+   	 </div>
+   </div>
+{% endblock %}
+{% block script %} 
+<script>		
+
+var feature1 = {{feature1_list|tojson |safe}};
+var feature2 = {{feature2_list|tojson |safe}};
+
+var feature3=[12, 24]
+function makeSelect(feature, select){
+	feature.forEach(function(item){
+		var option = $('<option></option>');
+		$(option).addClass('btn btn-secondary')
+		$(option).val(item)
+		$(option).html(item)
+		$(select).append(option)
+		console.log(feature1)
+	});
+}
+
+var callBack = function(){
+	makeSelect(feature1, '#select1');
+	makeSelect(feature2, '#select2');
+	
+};
+$(document).ready(callBack);
+
+
+
+$('#submit').click(function(){
+	val1 = $('#select1').val()
+	val2 = $('#select2').val()
+	window.location.href='/data_causality_analysis/'+val1+'/'+val2;
+});
+
+</script>
+<script>
+var val1 = {{val1|tojson |safe}};
+var val2= {{val2|tojson |safe}};
+var lag_range= {{lag_range}}; 
+var max_idx = {{max_idx}};
+var min_idx = {{min_idx}}; 
+var min_max_diff= {{min_max_diff}}; 
+var best_lag = {{best_lag}};
+var absmax_idx = {{absmax_idx}};
+var absmax = {{absmax}};
+
+
+high_absmax = 0.7
+limit_absmax = 0.5
+limit_minmaxdiff = 0.6
+if (Math.abs(absmax) > high_absmax){
+	s1 = "The maximum absolute correlation value is <code>"+ Math.abs(absmax) +"</code>. " 
+	s1 = s1+ val1+ " has the greatest effect on "+ val2+" after <code>"+best_lag+" </code>hours. "
+}
+else if(Math.abs(absmax) > limit_absmax){
+	if (min_max_diff > limit_minmaxdiff){
+		s1 = "The maximum absolute correlation value is <code>"+ Math.abs(absmax) +"</code>. " 
+		s1 = s1+ "And min_max_diff is bigger than "+ limit_minmaxdiff +'.'
+		s1 = s1+ val1+ " has the greatesst effect on "+ val2+" after <code>"+best_lag+" </code>hours. "
+	}
+	else{
+		s1 = val1+ " might not cause effects on "+val2+". "
+	}
+} 
+else {
+	s1 = val1+ " might not cause effects on "+val2+". "
+}
+var option = $('#result_statement');
+$(option).append(s1);
+
+
+</script>
+{% endblock %}

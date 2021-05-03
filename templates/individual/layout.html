@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="description" content="">
+<meta name="author" content="">
+
+<title>Indoor Environment Manager</title>
+
+<link href={{url_for('static', filename="boot_set/vendor/fontawesome-free/css/all.min.css")}} rel="stylesheet" type="text/css">
+<link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+<link href={{url_for( 'static', filename="css/bootstrap.min.css")}} rel="stylesheet" type="text/css">
+
+<!-- Custom styles for this template-->
+<link href={{url_for('static', filename="boot_set/css/sb-admin-2.min.css")}} rel="stylesheet">
+
+
+{% with messages = get_flashed_messages() %}
+    {% if messages[0] == 'success' %}
+    <script>
+       	alert('등록 완료')
+	</script>
+	{% elif messages[0] == 'failed' %}
+	<script>
+		alert('등록 실패')
+	</script>
+    {% endif %}
+{% endwith %}
+
+</head>
+
+<body id="page-top">
+
+	<!-- Page Wrapper -->
+	<div id="wrapper">
+		<!-- Sidebar -->
+		<ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+			<!-- Sidebar - Brand -->
+			<a class="sidebar-brand d-flex align-items-center justify-content-center" href="/">
+				<div class="sidebar-brand-icon rotate-n-15"></div>
+				<div class="sidebar-brand-text mx-3">VIBES Smart Farm<sup>v.1.0.</sup>
+				</div>
+			</a>
+			<!-- Divider -->
+			<hr class="sidebar-divider my-0">
+			<!-- Nav Item - Dashboard -->
+			<li class="nav-item active">
+				<a class="nav-link" href="/"> 
+					<i class="fas fa-fw fa-tachometer-alt"></i> <span>Home</span>
+				</a>
+			</li>
+			<!-- Divider -->
+			<hr class="sidebar-divider">
+			<!-- Heading -->
+			<div class="sidebar-heading">Farm Environment</div>
+			<!-- Nav Item - Pages Collapse Menu -->
+			<li class="nav-item">
+				<a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#Visual" aria-expanded="true" aria-controls="#InOut"> 
+					<i class="fas fa-fw fa-tv"></i> <span>Visualization</span>
+				</a>
+				<div id="Visual" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+					<div class="bg-white py-2 collapse-inner rounded farm_visual">
+						<h6 class="collapse-header">Farm Data</h6>
+					</div>
+					<div class="bg-white py-2 collapse-inner rounded out_visual">
+						<h6 class="collapse-header">Out Data</h6>
+					</div>
+				</div>
+			</li>
+			<li class="nav-item">
+				<a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#InOut" aria-expanded="true" aria-controls="#InOut"> 
+					<i class="fas fa-fw fa-tv"></i> <span>Outlier Detection</span>
+				</a>
+				<div id="InOut" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+					<div class="bg-white py-2 collapse-inner rounded farm_outlier_detection">
+						<h6 class="collapse-header">Farm Data</h6>
+					</div>
+				</div>
+			</li>
+			<li class="nav-item"><a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#DataReport" aria-expanded="true" aria-controls="#DataReport"> <i class="fas fa-fw fa-chart-bar"></i> <span>Data Report</span>
+			</a>
+				<div id="DataReport" class="collapse" aria-labelledby="headingUtilities" data-parent="#accordionSidebar">
+					<div class="bg-white py-2 collapse-inner rounded">
+						<h6 class="collapse-header">Individual Feature Report</h6>
+						<a class="collapse-item" href="/data_causality_analysis/out_humid/CO2ppm">Causality Analysis</a>
+						<a class="collapse-item" href="/data_distribution/CO2ppm">Data Distribution</a>
+					</div>
+					<div class="bg-white py-2 collapse-inner rounded">
+						<h6 class="collapse-header">Farm status Report</h6>
+						<a class="collapse-item" href='/data_causality_result'>Data causality result</a>
+						<a class="collapse-item" href='/data_correlation'>Data Correlation</a>
+					</div>
+				</div>
+			</li>
+
+			<!-- Divider -->
+			<hr class="sidebar-divider d-none d-md-block">
+
+			<!-- Sidebar Toggler (Sidebar) -->
+			<div class="text-center d-none d-md-inline">
+				<button class="rounded-circle border-0" id="sidebarToggle"></button>
+			</div>
+
+		</ul>
+		<!-- End of Sidebar -->
+
+		<!-- Content Wrapper -->
+		<div id="content-wrapper" class="d-flex flex-column">
+
+			<!-- Main Content -->
+			<div id="content">
+
+				<!-- Topbar -->
+				<nav
+					class="navbar navbar-expand navbar-light bg-white mb-4 static-top shadow">
+
+					<!-- Sidebar Toggle (Topbar) -->
+					<button id="sidebarToggleTop"
+						class="btn btn-link d-md-none rounded-circle mr-3">
+						<i class="fa fa-bars"></i>
+					</button>
+
+					<!-- Topbar Search -->
+					<!-- <form
+						class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search">
+						<div class="input-group">
+							<input type="text" class="form-control bg-light border-0 small"
+								placeholder="Search for..." aria-label="Search"
+								aria-describedby="basic-addon2">
+							<div class="input-group-append">
+								<button class="btn btn-primary" type="button">
+									<i class="fas fa-search fa-sm"></i>
+								</button>
+							</div>
+						</div>
+					</form> -->
+					<!-- navbar-search -->
+					<form action="/set_date" method="get" id="dateform"
+						class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 ">
+						<div class="input-group">
+							Start:
+							<input type="date" class="form-control bg-light border-0 small"
+								placeholder="END DATE" aria-label="Search" id="start" name="start"
+								aria-describedby="basic-addon2"> &nbsp;
+							End:
+							<input type="date" class="form-control bg-light border-0 small"
+								placeholder="END DATE" aria-label="Search" id="end" name="end"
+								aria-describedby="basic-addon2">
+							&nbsp;
+							<div class="input-group-append">
+								<button class="btn btn-primary" type="submit">
+									<i class="fas fa-search fa-sm"></i>
+								</button>
+							</div>
+						</div>
+					</form>
+					
+
+					<!-- Topbar Navbar -->
+				</nav>
+				<!-- End of Topbar -->
+
+				{% block content %}{% endblock %}
+
+			</div>
+			<!-- End of Main Content -->
+
+			<!-- Footer -->
+			<footer class="sticky-footer bg-white">
+				<div class="container my-auto">
+					<div class="copyright text-center my-auto">
+						<span>Copyright &copy; 2020 JW</span>
+					</div>
+				</div>
+			</footer>
+			<!-- End of Footer -->
+
+		</div>
+		<!-- End of Content Wrapper -->
+
+	</div>
+	<!-- End of Page Wrapper -->
+
+	<!-- Scroll to Top Button-->
+	<a class="scroll-to-top rounded" href="#page-top"> <i
+		class="fas fa-angle-up"></i>
+	</a>
+
+	<!-- Logout Modal-->
+	<div class="modal fade" id="logoutModal" tabindex="-1" role="dialog"
+		aria-labelledby="exampleModalLabel" aria-hidden="true">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
+					<button class="close" type="button" data-dismiss="modal"
+						aria-label="Close">
+						<span aria-hidden="true">×</span>
+					</button>
+				</div>
+				<div class="modal-body">Select "Logout" below if you are ready
+					to end your current session.</div>
+				<div class="modal-footer">
+					<button class="btn btn-secondary" type="button"
+						data-dismiss="modal">Cancel</button>
+					<a class="btn btn-primary" href="login.html">Logout</a>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Bootstrap core JavaScript-->
+	<script src={{url_for(
+		'static', filename="boot_set/vendor/jquery/jquery.min.js")}}></script>
+	<script src={{url_for(
+		'static', filename="boot_set/vendor/bootstrap/js/bootstrap.bundle.min.js")}}></script>
+
+	<!-- Core plugin JavaScript-->
+	<script src={{url_for(
+		'static', filename="boot_set/vendor/jquery-easing/jquery.easing.min.js")}}></script>
+
+	<!-- Custom scripts for all pages-->
+	<script src={{url_for(
+		'static', filename="boot_set/js/sb-admin-2.min.js")}}></script>
+
+</body>
+
+<script>
+<!-- g.start, g.end, g.in_feature_list, g.out_feature, g.out_feature_list_add -->
+
+$(document).ready(function(){
+	var start = {{g.start|tojson |safe}}
+	var end = {{g.end|tojson |safe}}
+	
+	document.getElementById('start').value= new Date(start).toISOString().substring(0, 10)
+	document.getElementById('end').value= new Date(end).toISOString().substring(0, 10)
+
+	var farm_feature_list = {{g.in_feature_list|tojson |safe}}
+	var out_feature_list_weather = {{g.out_feature_list|tojson |safe}}
+	var out_feature_list_air = {{g.out_feature_list_add|tojson |safe}}
+
+	for (i in farm_feature_list){	
+		farm_feature = farm_feature_list[i]
+		
+		href_address = '/data_ingestion_outlier/'+farm_feature
+		$information = $("<a/>", {class:"collapse-item", href:href_address, text:farm_feature})
+		$('.farm_outlier_detection').append($information)
+		
+		href_address = '/data_visual/'+farm_feature
+		$information = $("<a/>", {class:"collapse-item", href:href_address, text:farm_feature})
+		$('.farm_visual').append($information)	
+	}
+
+	for (i in out_feature_list_weather){	
+		out_feature = out_feature_list_weather[i]
+		
+		href_address = '/data_visual/'+out_feature
+		$information = $("<a/>", {class:"collapse-item", href:href_address, text:out_feature})
+		$('.out_visual').append($information)
+	}
+	for (i in out_feature_list_air){	
+		out_feature = out_feature_list_air[i]
+		
+		href_address = '/data_visual/'+out_feature
+		$information = $("<a/>", {class:"collapse-item", href:href_address, text:out_feature})
+		$('.out_visual').append($information)
+	}
+	
+	
+});
+</script>		
+{% block script %} 
+{% endblock %}
+</html>
