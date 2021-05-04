@@ -1,15 +1,11 @@
 import sys, os
-sys.path.append(os.path.dirname(__file__)+"/data_management")
-
-from data_influx import measurement_ingestion as mi
-from KETI_setting import influx_setting_KETI as isk
-
+sys.path.append("../")
 
 from data_management import data_manager as dm
-import config 
 import pandas as pd
 
 
+ 
 class VIBE:
     
     def __init__(self, space, type='VIBE_1'):
@@ -43,7 +39,7 @@ class VIBE:
                'out_wind_direction', 'out_wind_speed', 'out_wind_x', 'out_wind_y']
         self.out_feature_list = ['out_PM25', 'out_humid', 'out_pressure', 'out_rainfall', 'out_wind_speed']
         self.out_feature_list_add=['out_O3','out_PM10',]
-        self.dbname_list=['KDS1', 'KDS2', 'HS1', 'HS2']
+        #self.dbname_list=['KDS1', 'KDS2', 'HS1', 'HS2']
     
     def _get_sample_time(self,space_name):
         if space_name == 'KDS1':
@@ -79,12 +75,26 @@ class VIBE:
     
 
 if __name__ == "__main__":
-    space_list=['HS1', 'HS2']
-    ingestion_start='2020-09-26 22:50:00'
-    ingestion_end='2021-11-30 23:59:59'
-    Dinfo = VIBE('HS1')
-    Dinfo.set_time(ingestion_start, ingestion_end)
-
-    dataD = dm.Data(Dinfo)
-    Dset = dm.get_dataSet(space_list, dataD, Dinfo)
+    start='2020-09-30 00:00:01'
+    end ='2020-10-18 00:00:00'
+    intDataInfo = {
+            "Data":[{"db_name":"INNER_AIR", "measurement":"HS1", "domain":"farm", "subdomain":"airQuality"},
+                    {"db_name":"OUTDOOR_AIR", "measurement":"sangju", "domain":"city", "subdomain":"airQuality" },
+                    {"db_name":"OUTDOOR_WEATHER", "measurement":"sangju", "domain":"city", "subdomain":"weather"}],
+            "start":str(start),
+            "end":str(end)
+    }
+    from KETI_setting import influx_setting_KETI as ins
+    from data_influx import ingestion_measurement as ing
+    
+    DataList = intDataInfo["Data"]
+    start = intDataInfo['start']
+    end = intDataInfo['end']
+    result={}
+    for i, dbinfo in enumerate(DataList):
+        db_name = dbinfo['db_name']
+        measurement = dbinfo['measurement']
+        influx_c = ing.Influx_management(ins.host_, ins.port_, ins.user_, ins.pass_, db_name, ins.protocol)
+        result[i] = influx_c.get_df_by_time(start,end,measurement)
+        print(result[i])
         
