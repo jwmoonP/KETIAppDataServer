@@ -25,6 +25,7 @@ visual_resample_min='60min'
 ########### 
 ################################
 data_raw_partial={}
+data_clean_partial={}
 @app.route('/',  methods=['GET'])
 def index():
     from data_selection import static_dataSet 
@@ -36,13 +37,11 @@ def index():
     # data ingestion
     data_raw_partial = ipd.partial_dataSet_ingestion(intDataInfo, ins)
     # data cleaning
-    #data_clean_partial = 
+    from KETI_pre_dataCleaning.extream_data import extream_data_deletion as edd
+    data_clean_partial =  edd.extream_error_deletion()
+    #data_clean_partial =
     
     return render_template('/index.html')
-
- 
-    
-
 
 
 ###################### Server 3
