@@ -77,24 +77,13 @@ class VIBE:
 if __name__ == "__main__":
     start='2020-09-30 00:00:01'
     end ='2020-10-18 00:00:00'
-    intDataInfo = {
-            "Data":[{"db_name":"INNER_AIR", "measurement":"HS1", "domain":"farm", "subdomain":"airQuality"},
-                    {"db_name":"OUTDOOR_AIR", "measurement":"sangju", "domain":"city", "subdomain":"airQuality" },
-                    {"db_name":"OUTDOOR_WEATHER", "measurement":"sangju", "domain":"city", "subdomain":"weather"}],
-            "start":str(start),
-            "end":str(end)
-    }
-    from KETI_setting import influx_setting_KETI as ins
-    from data_influx import ingestion_measurement as ing
-    
-    DataList = intDataInfo["Data"]
-    start = intDataInfo['start']
-    end = intDataInfo['end']
-    result={}
-    for i, dbinfo in enumerate(DataList):
-        db_name = dbinfo['db_name']
-        measurement = dbinfo['measurement']
-        influx_c = ing.Influx_management(ins.host_, ins.port_, ins.user_, ins.pass_, db_name, ins.protocol)
-        result[i] = influx_c.get_df_by_time(start,end,measurement)
-        print(result[i])
+    from data_selection import static_dataSet 
+    from KETI_pre_dataIngestion.data_influx import ingestion_partial_dataset as ipd
+    from KETI_pre_dataIngestion.KETI_setting import influx_setting_KETI as ins
+    #from KETI_pre_dataCleaning.extream_data import ingestion_partial_dataset as ipd
+    # data selection
+    intDataInfo = static_dataSet.set_integratedDataInfo(start, end)
+    # data ingestion
+    data_raw_partial = ipd.partial_dataSet_ingestion(intDataInfo, ins)
+    print(data_raw_partial)
         

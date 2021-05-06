@@ -22,31 +22,27 @@ end ='2020-10-18 00:00:00'
 visual_resample_min='60min'
 ########################################## Template 
 #g.start, g.end
-###########################################
-
+########### 
+################################
+data_raw_partial={}
 @app.route('/',  methods=['GET'])
 def index():
-    import data_selection.static_dataSet as sDS
-    intDataInfo = sDS.set_integratedDataInfo(start, end)
-    result = get_data(intDataInfo)
+    from data_selection import static_dataSet 
+    from KETI_pre_dataIngestion.data_influx import ingestion_partial_dataset as ipd
+    from KETI_pre_dataIngestion.KETI_setting import influx_setting_KETI as ins
+    #from KETI_pre_dataCleaning.extream_data import ingestion_partial_dataset as ipd
+    # data selection
+    intDataInfo = static_dataSet.set_integratedDataInfo(start, end)
+    # data ingestion
+    data_raw_partial = ipd.partial_dataSet_ingestion(intDataInfo, ins)
+    # data cleaning
+    #data_clean_partial = 
+    
     return render_template('/index.html')
 
-def get_data(intDataInfo):
-    from KETI_setting import influx_setting_KETI as ins
-    from data_influx import ingestion_measurement as ing
+ 
     
-    DataList = intDataInfo["Data"]
-    start = intDataInfo['start']
-    end = intDataInfo['end']
-    result={}
-    for i, dbinfo in enumerate(DataList):
-        db_name = dbinfo['db_name']
-        measurement = dbinfo['measurement']
-        influx_c = ing.Influx_management(ins.host_, ins.port_, ins.user_, ins.pass_, db_name, ins.protocol)
-        result[i] = influx_c.get_df_by_time(start,end,measurement)
-        print(result[i])
-    
-    return result
+
 
 
 ###################### Server 3
