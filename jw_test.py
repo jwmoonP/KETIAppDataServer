@@ -1,3 +1,4 @@
+import numpy as np 
 import sys, os
 sys.path.append("../")
 
@@ -17,14 +18,7 @@ class VIBE:
         self.drop_features = ['3rdPanSpeed', '4thPanSpeed', 'CoolingPad', 'LowerPanSpeed', 'Quarantine', 'WaterMotor']
         
         self.data_char_list = {'farm':{'INNER_AIR':space}, 'out_air':{"OUTDOOR_AIR":'sangju'}, 'out_weather':{'OUTDOOR_WEATHER':'sangju'}}
-        self.data_range = {'max_num':{'CO2ppm':10000, 'H2Sppm':100, 'NH3ppm':300, 'OptimalTemperature':45, 
-                               'RichTemperature':45, 'RichHumidity':100, 'comp_temp':45, 'comp_humid':100,
-                               '2ndPanSpeed':200, 'UpperPanSpeed':200,
-                              'out_humid':100,'out_pressure':2000,'out_temp':50 },
-                   'min_num':{'CO2ppm':0, 'H2Sppm':0, 'NH3ppm':0, 'OptimalTemperature':-20, 'RichTemperature':-20, 
-                              'RichHumidity':0, 'comp_temp':-20, 'comp_humid':0, '2ndPanSpeed':0, 'UpperPanSpeed':0,
-                             'out_humid':0, 'out_pressure':0, 'out_temp':-30}}
-    
+
         self.data_range_level={'NH3ppm':{"level":[0, 20, 25, 1000000 ], 'label':[0, 1, 2]},
                         'H2Sppm':{"level":[0, 0.5, 10000000 ], 'label':[0, 1]},
                         'CO2ppm':{"level":[0, 2500, 5500, 10000000 ], 'label':[0, 1, 2]},
@@ -67,16 +61,26 @@ class VIBE:
                  print(table_name, db_name)
                  influx_c = mi.Influx_management(isk.host_, isk.port_, isk.user_, isk.pass_, db_name, isk.protocol)
                  data_raw[data_char] = influx_c.get_df_by_time(start,end,table_name) 
-                 print(data_raw[data_char])
                  #ifm.Influx_management(config.host_, config.port_, config.user_, config.pass_, db_name, config.protocol, table=table_name).get_raw_data(start, end)
 
                  
         return data_raw
-    
+
+
+
+
+def data_nan_processing(self, data, resample_min, limit_minute_for_nan_processing): 
+    data_key_list = list(data.keys())
+    limit_num_for_nan_processing = math.ceil(limit_minute_for_nan_processing/resample_min)  
+    data_non_nan= data.interpolate(method='values', limit= limit_num_for_nan_processing)
+    return data_non_nan
+        
 
 if __name__ == "__main__":
     start='2020-09-30 00:00:01'
     end ='2020-10-18 00:00:00'
+    data_type = 'air'
+    
     from data_selection import static_dataSet 
     from KETI_pre_dataIngestion.data_influx import ingestion_partial_dataset as ipd
     from KETI_pre_dataIngestion.KETI_setting import influx_setting_KETI as ins
@@ -84,6 +88,17 @@ if __name__ == "__main__":
     # data selection
     intDataInfo = static_dataSet.set_integratedDataInfo(start, end)
     # data ingestion
-    data_raw_partial = ipd.partial_dataSet_ingestion(intDataInfo, ins)
-    print(data_raw_partial)
-        
+    data_partial_raw_dataS = ipd.partial_dataSet_ingestion(intDataInfo, ins)
+    
+    from KETI_pre_dataCleaning.definite_error_detection import valid_data, min_max_limit_value, outlier_detection
+    data_min_max_limit = min_max_limit_value.MinMaxLmitValueSet(data_type).get_data_min_max_limitSet()
+    data_partial_clean = valid_data.definite_error_detected_dataset(data_partial_raw_dataS, data_min_max_limit)
+    
+    from KETI_pre_dataCleaning.definite_error_detection import outlier_detection  
+    data_partial_clean = outlier_detection.error_dection_with_neihbor_dataset(data_partial_clean)
+    print(data_partial_clean)
+    
+
+    #data_out = error_detection_with_neighbor(sample, data_out, data_range)
+    
+    

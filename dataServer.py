@@ -28,6 +28,8 @@ data_raw_partial={}
 data_clean_partial={}
 @app.route('/',  methods=['GET'])
 def index():
+    data_type = 'air'
+    
     from data_selection import static_dataSet 
     from KETI_pre_dataIngestion.data_influx import ingestion_partial_dataset as ipd
     from KETI_pre_dataIngestion.KETI_setting import influx_setting_KETI as ins
@@ -35,11 +37,15 @@ def index():
     # data selection
     intDataInfo = static_dataSet.set_integratedDataInfo(start, end)
     # data ingestion
-    data_raw_partial = ipd.partial_dataSet_ingestion(intDataInfo, ins)
-    # data cleaning
-    from KETI_pre_dataCleaning.extream_data import extream_data_deletion as edd
-    data_clean_partial =  edd.extream_error_deletion()
-    #data_clean_partial =
+    data_partial_raw_dataS = ipd.partial_dataSet_ingestion(intDataInfo, ins)
+    
+    from KETI_pre_dataCleaning.definite_error_detection import valid_data, min_max_limit_value, outlier_detection
+    data_min_max_limit = min_max_limit_value.MinMaxLmitValueSet(data_type).get_data_min_max_limitSet()
+    data_partial_clean = valid_data.definite_error_detected_dataset(data_partial_raw_dataS, data_min_max_limit)
+    
+    from KETI_pre_dataCleaning.definite_error_detection import outlier_detection  
+    data_partial_clean = outlier_detection.error_dection_with_neihbor_dataset(data_partial_clean)
+    print(data_partial_clean)
     
     return render_template('/index.html')
 
