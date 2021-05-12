@@ -82,19 +82,19 @@ if __name__ == "__main__":
     data_type = 'air'
     
     from data_selection import static_dataSet 
-    from KETI_pre_dataIngestion.data_influx import ingestion_partial_dataset as ipd
-    from KETI_pre_dataIngestion.KETI_setting import influx_setting_KETI as ins
+    from KETIPreDataIngestion.data_influx import ingestion_partial_dataset as ipd
+    from KETIPreDataIngestion.KETI_setting import influx_setting_KETI as ins
     #from KETI_pre_dataCleaning.extream_data import ingestion_partial_dataset as ipd
     # data selection
     intDataInfo = static_dataSet.set_integratedDataInfo(start, end)
     # data ingestion
     data_partial_raw_dataS = ipd.partial_dataSet_ingestion(intDataInfo, ins)
     
-    from KETI_pre_dataCleaning.definite_error_detection import valid_data, min_max_limit_value, outlier_detection
+    from KETIPreDataCleaning.definite_error_detection import valid_data, min_max_limit_value, outlier_detection
     data_min_max_limit = min_max_limit_value.MinMaxLmitValueSet(data_type).get_data_min_max_limitSet()
     data_partial_clean = valid_data.make_valid_dataSet(data_partial_raw_dataS, data_min_max_limit)
     
-    from KETI_pre_dataCleaning.definite_error_detection import outlier_detection  
+    from KETIPreDataCleaning.definite_error_detection import outlier_detection  
     data_partial_clean = outlier_detection.make_neighborErrorDetected_dataSet(data_partial_clean)
     print(data_partial_clean)
     
