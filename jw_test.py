@@ -92,13 +92,14 @@ if __name__ == "__main__":
     
     from KETI_pre_dataCleaning.definite_error_detection import valid_data, min_max_limit_value, outlier_detection
     data_min_max_limit = min_max_limit_value.MinMaxLmitValueSet(data_type).get_data_min_max_limitSet()
-    data_partial_clean = valid_data.definite_error_detected_dataset(data_partial_raw_dataS, data_min_max_limit)
+    data_partial_clean = valid_data.make_valid_dataSet(data_partial_raw_dataS, data_min_max_limit)
     
     from KETI_pre_dataCleaning.definite_error_detection import outlier_detection  
-    data_partial_clean = outlier_detection.error_dection_with_neihbor_dataset(data_partial_clean)
+    data_partial_clean = outlier_detection.make_neighborErrorDetected_dataSet(data_partial_clean)
     print(data_partial_clean)
     
 
+    
     #data_out = error_detection_with_neighbor(sample, data_out, data_range)
     
     
